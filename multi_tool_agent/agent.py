@@ -1,18 +1,10 @@
 from google.adk.agents import Agent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from google.genai import types
 
-# Import the tools and service function from your quickstart file
-from .quickstart import (
-    summarize_email_tool,
-    generate_reply_tool,
-    send_reply_tool,
-    get_gmail_service,
-    list_emails_tool,
-    search_emails_tool,
-    generate_reply_with_gemini,
-)
+from .quickstart import agent_tools
+
+GEMINI_MODEL_NAME = "gemini-2.0-flash-001"
 
 # --- Agent Definition ---
 
@@ -45,19 +37,9 @@ Workflow for Replying:
 6. Handle errors gracefully by informing the user.
 """
 
-# Create the list of tools for the agent
-# Ensure list_emails_tool and search_emails_tool are included
-agent_tools = [
-    list_emails_tool,
-    search_emails_tool,
-    summarize_email_tool,
-    generate_reply_with_gemini,
-    send_reply_tool,
-]
 
-# Create the Agent instance
 root_agent = Agent(
-    model="gemini-2.0-flash-lite-001", 
+    model=GEMINI_MODEL_NAME, 
     name='email_agent',
     description="An agent that helps with Gmail tasks such as listing, searching, summarizing and replying.",
     instruction=AGENT_INSTRUCTION,
@@ -71,15 +53,6 @@ if __name__ == "__main__":
     print("Try prompts like: 'Summarize the latest email', 'Summarize email from <sender>', 'Reply to the email about <subject>'")
     print("Make sure credentials.json and potentially token.json are present.")
 
-    # Ensure the Gmail service can be authenticated before starting REPL
-    print("Attempting initial Gmail authentication...")
-    if get_gmail_service():
-        print("Gmail authentication successful.")
-    else:
-        print("Failed to authenticate Gmail service. Please check credentials.json and permissions.")
-        print("Exiting.")
-
     session_service = InMemorySessionService()
     session = session_service.create_session(app_name="AI MAIL", user_id=1234, session_id=123)
     runner = Runner(agent=root_agent, app_name="AI MAIL", session_service=session_service)
-
